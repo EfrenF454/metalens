@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MetaLens — Extractor de metadatos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <span>Meta<em>Lens</em></span>
+      </div>
+      <p class="tagline">Extractor de metadatos · ExifTool + ffprobe</p>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Zona de subida -->
+    <section id="dropzone" class="dropzone" tabindex="0" role="button"
+             aria-label="Subir archivo: arrastra una foto o video, o pulsa para seleccionar">
+      <input type="file" id="file-input" accept="image/*,video/*,.heic,.heif,.raw,.cr2,.cr3,.nef,.arw,.dng,.orf,.rw2" hidden />
+      <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <h1>Arrastra una foto o video aquí</h1>
+      <p>o <span class="link">selecciona un archivo</span> desde tu equipo</p>
+      <p class="dz-hint">JPEG · PNG · HEIC · RAW · TIFF · WebP · MP4 · MOV · AVI · MKV — hasta 1 GB</p>
+    </section>
+
+    <!-- Estado de carga -->
+    <section id="loading" class="loading" hidden aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="loading-text">Extrayendo metadatos…</p>
+    </section>
+
+    <!-- Error -->
+    <section id="error" class="error" hidden role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p id="error-text"></p>
+      <button id="error-retry" class="btn btn-ghost" type="button">Intentar de nuevo</button>
+    </section>
+
+    <!-- Resultados -->
+    <section id="results" hidden>
+      <div class="results-bar">
+        <button id="btn-new" class="btn btn-ghost" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Analizar otro archivo
+        </button>
+        <div class="download-group">
+          <button id="btn-json" class="btn btn-accent" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Descargar JSON
+          </button>
+          <button id="btn-csv" class="btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
+            </svg>
+            Descargar CSV
+          </button>
+          <button id="btn-xlsx" class="btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 12 6 6"/><path d="m15 12-6 6"/>
+            </svg>
+            Descargar Excel
+          </button>
+        </div>
+      </div>
+
+      <div class="results-grid">
+        <div class="preview-card card">
+          <div id="preview" class="preview"></div>
+          <div class="preview-meta">
+            <h2 id="file-name" class="file-name"></h2>
+            <p id="file-info" class="file-info mono"></p>
+          </div>
+        </div>
+        <div id="summary-cards" class="summary-cards"></div>
+      </div>
+
+      <div id="gps-card" class="card gps-card" hidden>
+        <div class="gps-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          <div>
+            <h3>Ubicación GPS</h3>
+            <p id="gps-coords" class="mono"></p>
+          </div>
+        </div>
+        <a id="gps-link" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">Ver en el mapa</a>
+      </div>
+
+      <div class="card tags-card">
+        <div class="tags-header">
+          <h3>Todos los metadatos <span id="tag-count" class="badge"></span></h3>
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input id="tag-search" type="search" placeholder="Filtrar tags…" aria-label="Filtrar metadatos" />
+          </div>
+        </div>
+        <div id="tag-groups"></div>
+        <p id="no-match" class="no-match" hidden>Ningún tag coincide con el filtro.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Los archivos se procesan en el servidor y se eliminan inmediatamente tras la extracción.</p>
+  </footer>
+
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
