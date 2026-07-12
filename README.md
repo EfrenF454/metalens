@@ -39,6 +39,18 @@ Respuesta:
 - `groups` — todos los tags de ExifTool agrupados por familia (`-G1`).
 - `ffprobe` — salida cruda de ffprobe (solo videos).
 
+## Despliegue
+
+Esta app necesita un **servidor persistente** — no funciona en plataformas serverless como Vercel (límite de 4.5 MB por petición, sin ffprobe ni Perl en el runtime).
+
+El `Dockerfile` incluido trae Node + ffmpeg + Perl y funciona tal cual en:
+
+- **Render**: "New → Web Service", conecta el repo y detecta `render.yaml` automáticamente. El proxy de Render admite subidas grandes (~100 MB por petición).
+- **Railway**: "New Project → Deploy from GitHub repo"; detecta el Dockerfile solo.
+- **Cualquier VPS**: `docker build -t metalens . && docker run -d -p 3000:3000 metalens`
+
+El servidor lee el puerto de la variable `PORT` (por defecto 3000), como esperan ambas plataformas.
+
 ## Seguridad
 
 - Los archivos se guardan con nombre aleatorio en un directorio temporal y se **eliminan inmediatamente** tras la extracción.
