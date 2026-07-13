@@ -4,15 +4,23 @@ const $ = (id) => document.getElementById(id);
 
 const dropzone = $('dropzone');
 const fileInput = $('file-input');
+const folderInput = $('folder-input');
+const folderBtn = $('folder-btn');
 const loadingEl = $('loading');
 const errorEl = $('error');
 const resultsEl = $('results');
 const dzWarningEl = $('dz-warning');
+const folderListEl = $('folder-list');
+const folderListItemsEl = $('folder-list-items');
+const folderListEmptyEl = $('folder-list-empty');
+
+const FOLDER_ACCEPTED_EXT = /\.(jpe?g|png|gif|bmp|tiff?|webp|heic|heif|raw|cr2|cr3|nef|arw|dng|orf|rw2|mp4|mov|avi|mkv|m4v|3gp|webm)$/i;
 
 let lastResult = null;
 let lastFileName = 'metadata';
 let lastSummaryRows = [];
 let previewURL = null;
+let folderFiles = [];
 
 const baseName = () => lastFileName.replace(/\.[^.]+$/, '');
 
@@ -30,6 +38,7 @@ function show(state) {
   loadingEl.hidden = state !== 'loading';
   errorEl.hidden = state !== 'error';
   resultsEl.hidden = state !== 'results';
+  folderListEl.hidden = state !== 'folder-list';
   dzWarningEl.hidden = state !== 'drop';
 }
 
@@ -41,6 +50,7 @@ function showError(message) {
 // ---------- Subida ----------
 dropzone.addEventListener('click', () => fileInput.click());
 dropzone.addEventListener('keydown', (e) => {
+  if (e.target !== dropzone) return;
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     fileInput.click();
@@ -49,6 +59,48 @@ dropzone.addEventListener('keydown', (e) => {
 fileInput.addEventListener('change', () => {
   if (fileInput.files.length) handleFile(fileInput.files[0]);
 });
+
+// ---------- Selección de carpeta (conserva GPS al evitar la galería de Android) ----------
+folderBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  folderInput.click();
+});
+folderInput.addEventListener('change', () => {
+  if (folderInput.files.length) handleFolderSelection(folderInput.files);
+});
+folderListItemsEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('.folder-item');
+  if (!btn) return;
+  handleFile(folderFiles[Number(btn.dataset.idx)]);
+});
+$('folder-list-back').addEventListener('click', () => {
+  folderInput.value = '';
+  show('drop');
+});
+
+function handleFolderSelection(fileList) {
+  const files = Array.from(fileList).filter((f) => FOLDER_ACCEPTED_EXT.test(f.name));
+
+  if (!files.length) {
+    folderFiles = [];
+    folderListItemsEl.innerHTML = '';
+    folderListEmptyEl.hidden = false;
+    return show('folder-list');
+  }
+  if (files.length === 1) {
+    return handleFile(files[0]);
+  }
+
+  files.sort((a, b) => b.lastModified - a.lastModified);
+  folderFiles = files;
+  folderListEmptyEl.hidden = true;
+  folderListItemsEl.innerHTML = files.map((f, i) => `
+    <li><button type="button" class="folder-item" data-idx="${i}">
+      <span class="folder-item-name">${esc(f.name)}</span>
+      <span class="folder-item-meta mono">${fmtBytes(f.size)} · ${esc(new Date(f.lastModified).toLocaleString('es-MX'))}</span>
+    </button></li>`).join('');
+  show('folder-list');
+}
 
 ['dragenter', 'dragover'].forEach((ev) =>
   dropzone.addEventListener(ev, (e) => {
@@ -70,6 +122,7 @@ dropzone.addEventListener('drop', (e) => {
 $('error-retry').addEventListener('click', () => show('drop'));
 $('btn-new').addEventListener('click', () => {
   fileInput.value = '';
+  folderInput.value = '';
   show('drop');
 });
 $('btn-json').addEventListener('click', () => {
