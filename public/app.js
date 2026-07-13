@@ -226,15 +226,23 @@ function render(data, file) {
 
   // GPS
   const gpsCard = $('gps-card');
+  const gpsLink = $('gps-link');
+  gpsCard.hidden = false;
   if (s.gps) {
-    gpsCard.hidden = false;
     const { latitude, longitude, altitude } = s.gps;
     $('gps-coords').textContent =
       `${latitude}, ${longitude}${altitude != null ? ` · ${Math.round(altitude)} m` : ''}`;
-    $('gps-link').href =
+    gpsLink.href =
       `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=16/${latitude}/${longitude}`;
+    gpsLink.textContent = 'Ver en el mapa';
+    gpsLink.className = 'btn btn-ghost';
+    gpsLink.removeAttribute('aria-disabled');
   } else {
-    gpsCard.hidden = true;
+    $('gps-coords').textContent = 'Sin datos';
+    gpsLink.removeAttribute('href');
+    gpsLink.textContent = 'Sin datos';
+    gpsLink.className = 'gps-no-data';
+    gpsLink.setAttribute('aria-disabled', 'true');
   }
 
   renderGroups(data.groups);

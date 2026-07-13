@@ -59,6 +59,8 @@ body {
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  color: inherit;
+  text-decoration: none;
 }
 .logo svg { width: 24px; height: 24px; color: var(--accent); }
 .logo em { font-style: normal; color: var(--accent); }
@@ -173,6 +175,16 @@ body {
 }
 .download-group { display: flex; gap: 12px; flex-wrap: wrap; }
 
+@media (max-width: 640px) {
+  .results-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .download-group { display: contents; }
+  .results-bar .btn { width: 100%; justify-content: center; }
+}
+
 .results-grid {
   display: grid;
   grid-template-columns: minmax(280px, 380px) 1fr;
@@ -247,6 +259,7 @@ body {
 .gps-info svg { width: 28px; height: 28px; color: var(--accent); flex-shrink: 0; }
 .gps-info h3 { font-size: 15px; }
 .gps-info p { color: var(--fg-dim); font-size: 13px; }
+.gps-no-data { color: var(--fg-dim); font-size: 14px; font-weight: 500; }
 
 /* ---------- Tags table ---------- */
 .tags-card { padding: 0; }
