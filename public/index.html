@@ -28,7 +28,6 @@
     <section id="dropzone" class="dropzone" tabindex="0" role="button"
              aria-label="Subir archivo: arrastra una foto o video, o pulsa para seleccionar">
       <input type="file" id="file-input" accept="image/*,video/*,.heic,.heif,.raw,.cr2,.cr3,.nef,.arw,.dng,.orf,.rw2" hidden />
-      <input type="file" id="folder-input" webkitdirectory directory multiple hidden />
       <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
         <polyline points="17 8 12 3 7 8"/>
@@ -37,9 +36,6 @@
       <h1>Arrastra una foto o video aquí</h1>
       <p>o <span class="link">selecciona un archivo</span> desde tu equipo</p>
       <p class="dz-hint">JPEG · PNG · HEIC · RAW · TIFF · WebP · MP4 · MOV · AVI · MKV — hasta 1 GB</p>
-      <p class="dz-hint">
-        o <button type="button" id="folder-btn" class="link-btn">elige una carpeta</button> (conserva el GPS al subir desde el celular)
-      </p>
     </section>
     <p id="dz-warning" class="dz-warning">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -61,16 +57,6 @@
       </svg>
       <p id="error-text"></p>
       <button id="error-retry" class="btn btn-ghost" type="button">Intentar de nuevo</button>
-    </section>
-
-    <!-- Selección dentro de una carpeta -->
-    <section id="folder-list" class="card folder-list" hidden>
-      <div class="folder-list-header">
-        <h2>Elige un archivo de la carpeta</h2>
-        <button id="folder-list-back" class="btn btn-ghost" type="button">Cancelar</button>
-      </div>
-      <ul id="folder-list-items" class="folder-list-items"></ul>
-      <p id="folder-list-empty" class="no-match" hidden>No se encontraron fotos ni videos en esa carpeta.</p>
     </section>
 
     <!-- Resultados -->
