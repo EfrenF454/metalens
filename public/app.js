@@ -7,6 +7,7 @@ const fileInput = $('file-input');
 const loadingEl = $('loading');
 const errorEl = $('error');
 const resultsEl = $('results');
+const dzWarningEl = $('dz-warning');
 
 let lastResult = null;
 let lastFileName = 'metadata';
@@ -29,6 +30,7 @@ function show(state) {
   loadingEl.hidden = state !== 'loading';
   errorEl.hidden = state !== 'error';
   resultsEl.hidden = state !== 'results';
+  dzWarningEl.hidden = state !== 'drop';
 }
 
 function showError(message) {
